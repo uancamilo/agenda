@@ -5,6 +5,8 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 export default function PhoneLogin() {
 	const [showOTP, setShowOTP] = useState(false);
 	const [phone, setPhone] = useState(" ");
+	const [otp, setOtp] = useState("");
+	const [user, setUser] = useState(null);
 
 	function onCaptchVerify() {
 		if (!window.recaptchaVerifier) {
@@ -41,6 +43,18 @@ export default function PhoneLogin() {
 			});
 	}
 
+	function onOTPVerify() {
+		window.confirmationResult
+			.confirm(otp)
+			.then(async (res) => {
+				console.log(res);
+				setUser(res.user);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+
 	return (
 		<>
 			<p>Para agendar la cita, ingrese su número de teléfono</p>
@@ -51,8 +65,9 @@ export default function PhoneLogin() {
 						type="number"
 						id="verificationCode"
 						placeholder="Código de verificación"
+						onChange={(e) => setOtp(e.target.value)}
 					/>
-					<button>Verificar</button>
+					<button onClick={onOTPVerify}>Verificar</button>
 				</div>
 			) : (
 				<div>
