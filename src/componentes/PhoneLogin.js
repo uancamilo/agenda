@@ -4,9 +4,11 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 export default function PhoneLogin() {
 	const [showOTP, setShowOTP] = useState(false);
-	const [phone, setPhone] = useState(" ");
+	const [phone, setPhone] = useState("");
 	const [otp, setOtp] = useState("");
 	const [user, setUser] = useState(null);
+
+	const otpNumber = Number(otp)
 
 	function onCaptchVerify() {
 		if (!window.recaptchaVerifier) {
@@ -28,19 +30,23 @@ export default function PhoneLogin() {
 	}
 
 	function onSignup() {
-		onCaptchVerify();
-		const appVerifier = window.recaptchaVerifier;
-		const formatPhone = "+57" + phone; // Change this to your desired country code
+		try {
+			onCaptchVerify();
+			const appVerifier = window.recaptchaVerifier;
+			const formatPhone = "+57" + phone;
 
-		signInWithPhoneNumber(auth, formatPhone, appVerifier)
-			.then((confirmationResult) => {
-				window.confirmationResult = confirmationResult;
-				setShowOTP(true);
-				console.log("OTP sent successfully!");
-			})
-			.catch((error) => {
-				console.log(error);
-			});
+			signInWithPhoneNumber(auth, formatPhone, appVerifier)
+				.then((confirmationResult) => {
+					window.confirmationResult = confirmationResult;
+					setShowOTP(true);
+					console.log("OTP enviado exitosamente!");
+				})
+				.catch((error) => {
+					console.error("Error al enviar OTP:", error);
+				});
+		} catch (error) {
+			console.error("Error en onSignup:", error);
+		}
 	}
 
 	function onOTPVerify() {
@@ -63,7 +69,8 @@ export default function PhoneLogin() {
 				<div>
 					<input
 						type="number"
-						id="verificationCode"
+						name="otp"
+						value={otp}
 						placeholder="Código de verificación"
 						onChange={(e) => setOtp(e.target.value)}
 					/>
@@ -73,10 +80,10 @@ export default function PhoneLogin() {
 				<div>
 					<input
 						type="tel"
-						id="PhoneNumber"
+						name="telefono"
 						value={phone}
-						onChange={(e) => setPhone(e.target.value)}
 						placeholder="Número de teléfono"
+						onChange={(e) => setPhone(e.target.value)}
 					/>
 					<button onClick={onSignup}>Obtener código</button>
 				</div>
