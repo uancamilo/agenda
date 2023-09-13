@@ -8,24 +8,32 @@ export default function PhoneLogin() {
 	const [otp, setOtp] = useState("");
 	const [user, setUser] = useState(null);
 
-	const otpNumber = Number(otp)
+	const otpNumber = Number(otp);
 
-	function onCaptchVerify() {
+	async function onCaptchVerify() {
 		if (!window.recaptchaVerifier) {
+			const recaptchaConfig = {
+				size: "invisible",
+				callback: () => {
+					onSignup();
+				},
+				"expired-callback": () => {
+					// Captcha expired callback logic, if needed
+				},
+			};
+
 			window.recaptchaVerifier = new RecaptchaVerifier(
 				auth,
 				"recaptcha-container",
-				{
-					size: "invisible",
-					callback: () => {
-						onSignup();
-					},
-					"expired-callback": () => {
-						// Captcha expired callback logic, if needed
-					},
-				},
-				auth
+				recaptchaConfig
 			);
+
+			try {
+				await window.recaptchaVerifier.verify();
+			} catch (error) {
+				// Manejar errores de verificación aquí
+				console.error("Error al verificar el reCAPTCHA:", error);
+			}
 		}
 	}
 
