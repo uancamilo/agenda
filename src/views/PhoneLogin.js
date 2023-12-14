@@ -10,39 +10,50 @@ export default function PhoneLogin() {
 	const [otp, setOtp] = useState("");
 	const [error, setError] = useState(null);
 
-	function onCaptchVerify() {
+	async function onCaptchVerify() {
 		if (!window.recaptchaVerifier) {
+			const recaptchaConfig = {
+				size: "invisible",
+				callback: () => {
+					onSignup();
+				},
+				"expired-callback": () => {
+					// Captcha expired callback logic, if needed
+				},
+			};
+
 			window.recaptchaVerifier = new RecaptchaVerifier(
 				auth,
 				"recaptcha-container",
-				{
-					size: "invisible",
-					callback: () => {
-						onSignup();
-					},
-					"expired-callback": () => {
-						// Captcha expired callback logic, if needed
-					},
-				},
-				auth
+				recaptchaConfig
 			);
+
+			try {
+				await window.recaptchaVerifier.verify();
+			} catch (error) {
+				// Manejar errores de verificación aquí
+				console.error("Error al verificar el reCAPTCHA:", error);
+			}
 		}
 	}
 
-	function onSignup() {
+	async function onSignup() {
 		onCaptchVerify();
 		const appVerifier = window.recaptchaVerifier;
 		const formatPhone = "+57" + phone;
 
-		signInWithPhoneNumber(auth, formatPhone, appVerifier)
-			.then((confirmationResult) => {
-				window.confirmationResult = confirmationResult;
-				setShowOTP(true);
-				console.log("OTP sent successfully!");
-			})
-			.catch((error) => {
-				console.log(error);
-			});
+		try {
+			const confirmationResult = await signInWithPhoneNumber(
+				auth,
+				formatPhone,
+				appVerifier
+			);
+			window.confirmationResult = confirmationResult;
+			setShowOTP(true);
+			console.log("OTP enviado exitosamente!");
+		} catch (error) {
+			console.error("Error al enviar OTP:", error);
+		}
 	}
 
 	function onVerify() {
@@ -87,10 +98,10 @@ export default function PhoneLogin() {
 				<div>
 					<input
 						type="tel"
-						id="PhoneNumber"
+						name="telefono"
 						value={phone}
-						onChange={(e) => setPhone(e.target.value)}
 						placeholder="Número de teléfono"
+						onChange={(e) => setPhone(e.target.value)}
 					/>
 					<button onClick={onSignup}>Obtener código</button>
 				</div>
