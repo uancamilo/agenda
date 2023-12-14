@@ -1,10 +1,15 @@
-import PhoneLogin from "./componentes/PhoneLogin";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import Citas from "./routes/Citas";
 
 function App() {
 	return (
-		<div >
-			<PhoneLogin/>
+		<div>
+			<BrowserRouter>
+				<Routes>
+					<Route path="/*" element={<Citas />} />
+				</Routes>
+			</BrowserRouter>
 		</div>
 	);
 }
