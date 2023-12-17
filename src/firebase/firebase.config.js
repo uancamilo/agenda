@@ -7,12 +7,12 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-	apiKey: "AIzaSyCKUehr-M0bDBggXhAUdrGHuIwD2HyiXZY",
-	authDomain: "agenda-barberia.firebaseapp.com",
-	projectId: "agenda-barberia",
-	storageBucket: "agenda-barberia.appspot.com",
-	messagingSenderId: "778423062315",
-	appId: "1:778423062315:web:d19ca31995e751ab3fbf6e",
+	apiKey: process.env.REACT_APP_CONFIG_API_KEY,
+	authDomain: process.env.REACT_APP_CONFIG_AUTH_DOMAIN,
+	projectId: process.env.REACT_APP_CONFIG_PROJECT_ID,
+	storageBucket: process.env.REACT_APP_CONFIG_STORAGE_BUCKET,
+	messagingSenderId: process.env.REACT_APP_CONFIG_MESSAGING_SENDER_ID,
+	appId: process.env.REACT_APP_CONFIG_APP_ID,
 };
 
 // Initialize Firebase
