@@ -15,7 +15,7 @@ export default function PhoneLogin() {
 			const recaptchaConfig = {
 				size: "invisible",
 				callback: () => {
-					onSignup();
+					onSignIn();
 				},
 				"expired-callback": () => {
 					// Captcha expired callback logic, if needed
@@ -37,7 +37,7 @@ export default function PhoneLogin() {
 		}
 	}
 
-	async function onSignup() {
+	async function onSignIn() {
 		onCaptchVerify();
 		const appVerifier = window.recaptchaVerifier;
 		const formatPhone = "+57" + phone;
@@ -68,7 +68,7 @@ export default function PhoneLogin() {
 		window.confirmationResult
 			.confirm(verificationCode)
 			.then(() => {
-				console.log("Verification successful!");
+				console.log("Verificación exitosa");
 				navigate("/calendario");
 			})
 			.catch((error) => {
@@ -103,7 +103,7 @@ export default function PhoneLogin() {
 						placeholder="Número de teléfono"
 						onChange={(e) => setPhone(e.target.value)}
 					/>
-					<button onClick={onSignup}>Obtener código</button>
+					<button onClick={onSignIn}>Obtener código</button>
 				</div>
 			)}
 			{error && <p style={{ color: "red" }}>{error}</p>}
