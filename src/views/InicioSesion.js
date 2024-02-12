@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase/firebase.config";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
-export default function PhoneLogin() {
+const InicioSesion = () => {
 	const navigate = useNavigate();
 	const [showOTP, setShowOTP] = useState(false);
 	const [phone, setPhone] = useState("");
@@ -109,4 +109,6 @@ export default function PhoneLogin() {
 			{error && <p style={{ color: "red" }}>{error}</p>}
 		</>
 	);
-}
+};
+
+export default InicioSesion;

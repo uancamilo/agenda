@@ -1,12 +1,24 @@
-import { Routes, Route } from "react-router-dom";
-import PhoneLogin from "../views/PhoneLogin";
-import Calendario from "../views/Calendario";
+import { signOut, getAuth } from "firebase/auth";
 
 export default function Citas() {
+	const auth = getAuth();
+	async function handleSignOut() {
+		try {
+			await signOut(auth);
+		} catch (error) {
+			console.log(error);
+		}
+	}
 	return (
-		<Routes>
-			<Route path="/" element={<PhoneLogin />} />
-			<Route path="/calendario" element={<Calendario/>}/>
-		</Routes>
+		<div>
+			<h1>Calendario</h1>
+			<button
+				onClick={() => {
+					handleSignOut();
+				}}
+			>
+				Sign Out
+			</button>
+		</div>
 	);
 }
