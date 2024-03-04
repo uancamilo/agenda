@@ -17,7 +17,7 @@ export default function Citas() {
 					handleSignOut();
 				}}
 			>
-				Sign Out
+				Salir
 			</button>
 		</div>
 	);

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase/firebase.config";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { auth } from "../firebase/firebase.config"; // Importa la instancia de autenticación de Firebase
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth"; // Importa las funciones necesarias de Firebase Authentication
 
-const InicioSesion = () => {
-	const navigate = useNavigate();
-	const [showOTP, setShowOTP] = useState(false);
-	const [phone, setPhone] = useState("");
-	const [otp, setOtp] = useState("");
-	const [error, setError] = useState(null);
+export default function InicioSesion() {
+	const navigate = useNavigate(); // Hook para la navegación en React Router
+	const [showOTP, setShowOTP] = useState(false); // Estado para mostrar el formulario de OTP
+	const [phone, setPhone] = useState(""); // Estado para almacenar el número de teléfono
+	const [otp, setOtp] = useState(""); // Estado para almacenar el código de verificación OTP
+	const [error, setError] = useState(null); // Estado para manejar errores
 
 	async function onCaptchVerify() {
 		if (!window.recaptchaVerifier) {
@@ -38,25 +38,29 @@ const InicioSesion = () => {
 	}
 
 	async function onSignIn() {
-		onCaptchVerify();
-		const appVerifier = window.recaptchaVerifier;
-		const formatPhone = "+57" + phone;
+		// Función para iniciar sesión y enviar OTP
+		await onCaptchVerify(); // Verifica el reCAPTCHA antes de enviar el OTP
+		const formatPhone = "+57" + phone; // Formatea el número de teléfono según el formato esperado por Firebase
+		const appVerifier = window.recaptchaVerifier; // Obtiene el verificador del reCAPTCHA
 
 		try {
+			// Inicia sesión con el número de teléfono y el verificador del reCAPTCHA
 			const confirmationResult = await signInWithPhoneNumber(
 				auth,
 				formatPhone,
 				appVerifier
 			);
-			window.confirmationResult = confirmationResult;
-			setShowOTP(true);
+			window.confirmationResult = confirmationResult; // Almacena el resultado de la confirmación para su uso posterior
+			setShowOTP(true); // Muestra el formulario de OTP después de enviar el código
 			console.log("OTP enviado exitosamente!");
 		} catch (error) {
+			// Maneja errores al enviar OTP
 			console.error("Error al enviar OTP:", error);
 		}
 	}
 
 	function onVerify() {
+		// Función para verificar el código OTP ingresado por el usuario
 		const verificationCode = otp.trim();
 
 		if (verificationCode === "") {
@@ -64,14 +68,17 @@ const InicioSesion = () => {
 			return;
 		}
 
-		// Agrega la lógica para verificar el código OTP
+		// Confirma el código OTP
 		window.confirmationResult
 			.confirm(verificationCode)
-			.then(() => {
+			.then((result) => {
+				const user = result.user;
+				console.log(user);
 				console.log("Verificación exitosa");
-				navigate("/calendario");
+				navigate("/calendario"); // Navega a la página de calendario después de la verificación exitosa
 			})
 			.catch((error) => {
+				// Maneja errores al verificar el código OTP
 				setError(
 					"Error al verificar el código. Por favor, inténtelo de nuevo."
 				);
@@ -109,6 +116,4 @@ const InicioSesion = () => {
 			{error && <p style={{ color: "red" }}>{error}</p>}
 		</>
 	);
-};
-
-export default InicioSesion;
+}
