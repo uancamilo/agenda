@@ -6,8 +6,8 @@ import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function InicioSesion() {
 	const navigate = useNavigate(); // Hook para la navegación en React Router
-	const [showOTP, setShowOTP] = useState(false); // Estado para mostrar el formulario de OTP
 	const [phone, setPhone] = useState(""); // Estado para almacenar el número de teléfono
+	const [showOTP, setShowOTP] = useState(false); // Estado para mostrar el formulario de OTP
 	const [otp, setOtp] = useState(""); // Estado para almacenar el código de verificación OTP
 	const [error, setError] = useState(null); // Estado para manejar errores
 
@@ -38,15 +38,6 @@ export default function InicioSesion() {
 		}
 	}
 
-	function resetRecaptcha() {
-		// Limpiar el antiguo RecaptchaVerifier
-		window.recaptchaVerifier.clear();
-		// Volver a crear el RecaptchaVerifier
-		window.recaptchaVerifier = null;
-		// Volver a llamar a la función onCaptchVerify para reiniciar el proceso
-		onCaptchVerify();
-	}
-
 	async function onSignIn() {
 		// Función para iniciar sesión y enviar OTP
 		await onCaptchVerify(); // Verifica el reCAPTCHA antes de enviar el OTP
@@ -55,18 +46,15 @@ export default function InicioSesion() {
 
 		try {
 			// Inicia sesión con el número de teléfono y el verificador del reCAPTCHA
-			const confirmationResult = await signInWithPhoneNumber(
-				auth,
-				formatPhone,
-				appVerifier
+			signInWithPhoneNumber(auth, formatPhone, appVerifier).then(
+				(confirmationResult) => {
+					window.confirmationResult = confirmationResult; // Almacena el resultado de la confirmación para su uso posterior
+					setShowOTP(true); // Muestra el formulario de OTP después de enviar el código
+					// console.log("OTP enviado exitosamente!");
+				}
 			);
-			window.confirmationResult = confirmationResult; // Almacena el resultado de la confirmación para su uso posterior
-			setShowOTP(true); // Muestra el formulario de OTP después de enviar el código
-			console.log("OTP enviado exitosamente!");
 		} catch (error) {
-			// Maneja errores al enviar OTP
-			console.error("Error al enviar OTP:", error);
-			resetRecaptcha();
+			console.error("Error al enviar OTP:", error); // Maneja errores al enviar OTP
 		}
 	}
 
@@ -125,10 +113,10 @@ export default function InicioSesion() {
 
 	return (
 		<>
-			<p>Para agendar la cita, ingrese su número de teléfono</p>
 			<div id="recaptcha-container"></div>
 			{showOTP ? (
 				<div>
+					<p>{`El código de verificación se ha enviado al celular ${phone}`}</p>
 					<input
 						type="number"
 						id="verificationCode"
@@ -140,6 +128,7 @@ export default function InicioSesion() {
 				</div>
 			) : (
 				<div>
+					<p>Para agendar una cita, ingrese su número de celular</p>
 					<input
 						type="tel"
 						name="telefono"
