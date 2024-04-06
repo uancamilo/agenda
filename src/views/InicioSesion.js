@@ -11,16 +11,12 @@ export default function InicioSesion() {
 	const [otp, setOtp] = useState(""); // Estado para almacenar el código de verificación OTP
 	const [error, setError] = useState(null); // Estado para manejar errores
 
-	async function onCaptchVerify() {
+	async function onCaptchaVerify() {
 		if (!window.recaptchaVerifier) {
 			const recaptchaConfig = {
 				size: "invisible",
-				callback: () => {
-					onSignIn();
-				},
-				"expired-callback": () => {
-					// Captcha expired callback logic, if needed
-				},
+				callback: onSignIn,
+				"expired-callback": handleExpiredCaptcha,
 			};
 
 			window.recaptchaVerifier = new RecaptchaVerifier(
@@ -32,29 +28,46 @@ export default function InicioSesion() {
 			try {
 				await window.recaptchaVerifier.verify();
 			} catch (error) {
-				// Manejar errores de verificación aquí
 				console.error("Error al verificar el reCAPTCHA:", error);
+				reinicializarRecaptcha();
 			}
 		}
 	}
 
+	// Función para reinicializar el reCAPTCHA
+	function reinicializarRecaptcha() {
+		window.recaptchaVerifier = null;
+	}
+
+	// Función para manejar el reCAPTCHA caducado
+	function handleExpiredCaptcha() {
+		reinicializarRecaptcha();
+		onCaptchaVerify(); // Volver a inicializar el reCAPTCHA
+	}
+
 	async function onSignIn() {
 		// Función para iniciar sesión y enviar OTP
-		await onCaptchVerify(); // Verifica el reCAPTCHA antes de enviar el OTP
-		const formatPhone = "+57" + phone; // Formatea el número de teléfono según el formato esperado por Firebase
-		const appVerifier = window.recaptchaVerifier; // Obtiene el verificador del reCAPTCHA
-
 		try {
-			// Inicia sesión con el número de teléfono y el verificador del reCAPTCHA
-			signInWithPhoneNumber(auth, formatPhone, appVerifier).then(
-				(confirmationResult) => {
+			await onCaptchaVerify(); // Verifica el reCAPTCHA antes de enviar el OTP
+			const formatPhone = "+57" + phone; // Formatea el número de teléfono según el formato esperado por Firebase
+			const appVerifier = window.recaptchaVerifier; // Obtiene el verificador del reCAPTCHA
+
+			await signInWithPhoneNumber(auth, formatPhone, appVerifier)
+				.then(async (confirmationResult) => {
 					window.confirmationResult = confirmationResult; // Almacena el resultado de la confirmación para su uso posterior
 					setShowOTP(true); // Muestra el formulario de OTP después de enviar el código
-					// console.log("OTP enviado exitosamente!");
-				}
-			);
+				})
+				.catch((error) => {
+					if (error.code === "auth/invalid-phone-number") {
+						console.error("Número de teléfono inválido");
+					} else if (error.code === "auth/captcha-check-failed") {
+						console.error("Verificación reCAPTCHA fallida");
+					} else {
+						console.error("Error desconocido al enviar OTP:", error);
+					}
+				});
 		} catch (error) {
-			console.error("Error al enviar OTP:", error); // Maneja errores al enviar OTP
+			console.error("Error al verificar el reCAPTCHA o enviar OTP:", error); // Maneja errores al verificar el reCAPTCHA o enviar OTP
 		}
 	}
 
@@ -118,7 +131,7 @@ export default function InicioSesion() {
 				<div>
 					<p>{`El código de verificación se ha enviado al celular ${phone}`}</p>
 					<input
-						type="number"
+						type="tel"
 						id="verificationCode"
 						value={otp}
 						onChange={(e) => setOtp(e.target.value)}
