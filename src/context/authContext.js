@@ -18,7 +18,7 @@ export function AuthContext({ children }) {
 		return () => {
 			if (unsubscribe) unsubscribe();
 		};
-	}, [auth]);
+	}, []);
 
 	const values = {
 		user: user,
